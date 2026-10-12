@@ -535,6 +535,53 @@ textarea { font: inherit; color: var(--texte); background: var(--blanc); border:
 .formulaire.deux-colonnes input:not([type=checkbox]), .formulaire.deux-colonnes textarea { width: 100%; min-width: 0; }
 #chiffres-fiche { grid-template-columns: repeat(3, 1fr); }
 
+/* ------------------------------------------------------------ planning (accueil) */
+:root { --vacances: #f6c9d6; --vacances-ligne: #fdf0f4; }
+html[data-theme="sombre"] { --vacances: #6b2a3d; --vacances-ligne: #33232a; }
+.entete-planning { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; max-width: 1240px; }
+.navigation-annee { display: flex; align-items: center; gap: 8px; }
+.navigation-annee strong { font-size: 16px; min-width: 44px; text-align: center; font-variant-numeric: tabular-nums; }
+.legende-planning { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: -4px 0 10px; max-width: 1240px; }
+.legende-planning span { display: inline-flex; align-items: center; gap: 6px; }
+.legende-planning i { width: 14px; height: 14px; display: inline-block; flex: none; border: 1px solid var(--bord-fort); }
+.cle-vacances { background: var(--vacances); }
+.cle-actuelle { background: var(--blanc); box-shadow: inset 0 0 0 2px var(--accent); }
+.cle-case { background: var(--blanc); }
+.cle-case.ok { background: var(--statut-bon); border-color: var(--statut-bon) !important; }
+.cadre-planning { max-height: 68vh; overflow: auto; border: 1px solid var(--bord-fort); background: var(--blanc); max-width: 1240px; }
+.planning { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 980px; }
+.planning th { position: sticky; top: 0; z-index: 2; background: var(--accent); color: var(--sur-accent); font-weight: 600; font-size: 12.5px;
+  padding: 8px 8px; text-align: left; border-right: 1px solid color-mix(in srgb, var(--sur-accent) 25%, transparent); }
+.planning th.num { width: 46px; text-align: center; }
+.planning th.dates { width: 62px; }
+.planning th.obs { width: 22%; }
+.planning td { border: 1px solid var(--bord); padding: 5px 7px; vertical-align: top; font-size: 12.5px; line-height: 1.35; }
+.planning td.num { text-align: center; font-weight: 700; font-size: 15px; vertical-align: middle; }
+.planning td.dates { font-size: 11.5px; color: var(--doux); white-space: nowrap; vertical-align: middle; font-variant-numeric: tabular-nums; }
+.planning tr.vacances td.num { background: var(--vacances); }
+.planning tr.vacances td { background-color: var(--vacances-ligne); }
+.planning tr.actuelle td { box-shadow: inset 0 2px 0 var(--accent), inset 0 -2px 0 var(--accent); }
+.planning tr.actuelle td.num { background: var(--accent); color: var(--sur-accent); }
+.planning td.place { height: 46px; cursor: pointer; }
+.planning td.place.vide:hover { background: color-mix(in srgb, var(--accent) 7%, var(--blanc)); }
+.planning td.place.vide:hover::after { content: "+ Ajouter"; color: var(--accent); font-size: 12px; font-weight: 600; }
+.planning td.place.occupee { background: color-mix(in srgb, var(--accent) 9%, var(--blanc)); border-left: 3px solid var(--accent); }
+.planning td.place.occupee.suite { background: color-mix(in srgb, var(--accent) 5%, var(--blanc)); }
+.planning td.place.occupee:hover { background: color-mix(in srgb, var(--accent) 16%, var(--blanc)); }
+.planning td.place b { font-weight: 700; letter-spacing: .02em; }
+.planning .infos { display: block; color: var(--doux); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.planning .infos a { color: inherit; text-decoration: underline dotted; }
+.cases-conv { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.case-conv { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 6px; font-size: 11px; border: 1px solid var(--bord-fort); background: var(--blanc); color: var(--texte); }
+.case-conv::before { content: ""; width: 10px; height: 10px; border: 1.5px solid var(--doux); display: inline-block; }
+.case-conv.ok { border-color: var(--statut-bon); }
+.case-conv.ok::before { background: var(--statut-bon); border-color: var(--statut-bon); box-shadow: inset 0 0 0 1.5px var(--blanc); }
+.case-conv:hover { border-color: var(--accent); }
+.planning td.obs textarea { width: 100%; min-height: 36px; border: 1px solid transparent; background: transparent; padding: 3px 5px; font-size: 12.5px; resize: vertical; }
+.planning td.obs textarea:hover { border-color: var(--bord); }
+.planning td.obs textarea:focus { background: var(--blanc); border-color: var(--accent); }
+.planning .trop { color: var(--rouge); font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+
 </style>
 </head>
 <body>
@@ -568,22 +615,30 @@ textarea { font: inherit; color: var(--texte); background: var(--blanc); border:
         <h1>Bonjour</h1>
         <p id="sous-titre" class="doux"></p>
         <div class="chiffres espace-haut" id="chiffres-accueil"></div>
+        <div class="entete-planning">
+          <h2 class="titre-section">Planning des stagiaires</h2>
+          <div class="navigation-annee">
+            <button class="bouton petit-bouton" id="annee-precedente" title="Année précédente">‹</button>
+            <strong id="annee-planning"></strong>
+            <button class="bouton petit-bouton" id="annee-suivante" title="Année suivante">›</button>
+            <button class="bouton petit-bouton" id="semaine-actuelle">Cette semaine</button>
+          </div>
+        </div>
+        <p class="legende-planning doux petit">
+          <span><i class="cle-vacances"></i>Vacances scolaires (zone B)</span>
+          <span><i class="cle-actuelle"></i>Semaine en cours</span>
+          <span><i class="cle-case ok"></i>Pré-convention / convention faite</span>
+          <span><i class="cle-case"></i>À faire (clique pour cocher)</span>
+          <span>Case vide : clique pour ajouter un stagiaire cette semaine-là.</span>
+        </p>
+        <div class="cadre-planning" id="cadre-planning">
+          <table class="planning" id="planning">
+            <thead><tr><th class="num">N°</th><th class="dates">Dates</th><th>Stagiaire 1</th><th>Stagiaire 2</th><th>Stagiaire 3</th><th>Stagiaire 4</th><th class="obs">Observations</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
         <h2 class="titre-section">À surveiller</h2>
         <div id="alertes" class="alertes"></div>
-        <h2 class="titre-section">En stage en ce moment</h2>
-        <div class="defilement-horizontal">
-          <table class="tableau-office cliquable" id="tableau-en-cours">
-            <thead><tr><th>Stagiaire</th><th>École · formation</th><th>Tuteur</th><th>Période</th><th>Avancement</th><th class="nombre">Heures</th><th class="nombre">Absences</th><th>Dernière évaluation</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <h2 class="titre-section">À venir</h2>
-        <div class="defilement-horizontal">
-          <table class="tableau-office cliquable" id="tableau-a-venir">
-            <thead><tr><th>Stagiaire</th><th>École · formation</th><th>Tuteur</th><th>Période</th><th>Convention</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
       </section>
 
       <!-- ===================== LISTE DES STAGIAIRES ===================== -->
@@ -648,10 +703,15 @@ textarea { font: inherit; color: var(--texte); background: var(--blanc); border:
               <label>Fin du stage *<input id="f-fin" type="date"></label>
               <label>Tuteur au magasin<input id="f-tuteur" type="text" list="liste-tuteurs" autocomplete="off"></label>
               <label>Heures prévues par semaine<input id="f-heures" type="text" inputmode="decimal" placeholder="35"></label>
+              <label>Téléphone du stagiaire<input id="f-telephone" type="tel" autocomplete="off"></label>
+              <label>Proche à prévenir<input id="f-proche" type="text" autocomplete="off" placeholder="ex. Mme Martin (mère)"></label>
+              <label>Téléphone du proche<input id="f-telephone-proche" type="tel" autocomplete="off"></label>
+              <span></span>
               <label>Référent de l'école<input id="f-referent" type="text" autocomplete="off"></label>
               <label>Contact du référent<input id="f-contact" type="text" autocomplete="off" placeholder="e-mail ou téléphone de l'école"></label>
-              <label class="case pleine"><input id="f-convention" type="checkbox"> Convention de stage signée</label>
-              <label class="pleine">Notes<textarea id="f-notes" rows="4" placeholder="Jours de présence, objectifs fixés par l'école, remarques…"></textarea></label>
+              <label class="case"><input id="f-pre-convention" type="checkbox"> Pré-convention faite</label>
+              <label class="case"><input id="f-convention" type="checkbox"> Convention signée</label>
+              <label class="pleine">Commentaire<textarea id="f-notes" rows="4" placeholder="Jours de présence, objectifs fixés par l'école, remarques…"></textarea></label>
             </div>
             <p class="doux petit espace-haut-petit" id="trace-fiche"></p>
           </div>
@@ -1087,7 +1147,7 @@ const COULEURS_PROPOSEES = [
   ["Bordeaux", "#A4262C"], ["Violet", "#5C2E91"], ["Orange", "#CA5010"], ["Graphite", "#323130"],
 ];
 
-let D = { stagiaires: [], presences: [], evaluations: [], partages: { ...PARTAGES_PAR_DEFAUT } };
+let D = { stagiaires: [], presences: [], evaluations: [], partages: { ...PARTAGES_PAR_DEFAUT }, semaines: [] };
 const locaux = () => ({ ...LOCAUX_PAR_DEFAUT, ...(memoire.lire(CLE_LOCAUX) || {}) });
 
 // ------------------------------------------------------------ petits outils
@@ -1155,18 +1215,20 @@ function etatStage(s, jour = aujourdhui()) {
 }
 const etiquetteStatut = (cle, texte) => `<span class="etiquette-statut ${cle}"><i></i>${echapper(texte)}</span>`;
 const parId = (id) => D.stagiaires.find((s) => s.id === id);
+const etatConventions = (s) => `<span class="${s.pre_convention ? "ok-texte" : "manque-texte"}">Pré ${s.pre_convention ? "✓" : "✗"}</span> · <span class="${s.convention_signee ? "ok-texte" : "manque-texte"}">Conv. ${s.convention_signee ? "✓" : "✗"}</span>`;
 
 // ------------------------------------------------------------ données
 async function chargerDonnees() {
-  const [stagiaires, presences, evaluations, reglages] = await Promise.all([
+  const [stagiaires, presences, evaluations, reglages, semaines] = await Promise.all([
     base.lire("stg_stagiaires", "date_debut.desc,prenom.asc"),
     base.lire("stg_presences", "date.asc"),
     base.lire("stg_evaluations", "date.asc"),
     base.lire("stg_reglages", "cle.asc"),
+    base.lire("stg_semaines", "annee.asc,semaine.asc"),
   ]);
   const partages = JSON.parse(JSON.stringify(PARTAGES_PAR_DEFAUT));
   for (const r of reglages) if (r.cle in partages && r.valeur !== null) partages[r.cle] = r.valeur;
-  D = { stagiaires, presences, evaluations, partages };
+  D = { stagiaires, presences, evaluations, partages, semaines };
   $("#liste-ecoles").innerHTML = [...new Set(stagiaires.map((s) => s.ecole).filter(Boolean))].sort().map((e) => `<option value="${echapper(e)}">`).join("");
   $("#liste-tuteurs").innerHTML = [...new Set(stagiaires.map((s) => s.tuteur).filter(Boolean))].sort().map((e) => `<option value="${echapper(e)}">`).join("");
   return D;
@@ -1210,7 +1272,8 @@ function alertes() {
     const st = stats(s);
     const nom = nomComplet(s);
     if (!s.convention_signee && etat !== "termine") {
-      liste.push({ grave: etat === "en_cours", id: s.id, page: "fiche", titre: nom, texte: "Convention de stage pas encore signée",
+      liste.push({ grave: etat === "en_cours", id: s.id, page: "fiche", titre: nom,
+                   texte: s.pre_convention ? "Convention de stage pas encore signée" : "Pré-convention et convention à faire",
                    detail: etat === "en_cours" ? "stage en cours" : `commence le ${dateCourte(s.date_debut)}` });
     }
     if (etat === "en_cours" && ecartJours(s.date_debut, jour) >= 3) {
@@ -1321,7 +1384,7 @@ async function afficher(page, options = {}) {
     await chargerDonnees();
     if (page === "accueil") remplirAccueil();
     if (page === "stagiaires") remplirListe();
-    if (page === "fiche") ouvrirFiche(options.id ?? null);
+    if (page === "fiche") ouvrirFiche(options.id ?? null, options.preremplir || {});
     if (page === "presences") ouvrirPresences(options.date || $("#date-presences").value || aujourdhui());
     if (page === "evaluations") ouvrirEvaluations(options);
     if (page === "parametres") remplirParametres();
@@ -1350,18 +1413,131 @@ function remplirAccueil() {
         <span class="niveau-alerte">${a.grave ? "Urgent" : "À faire"}</span></button>`).join("")
     : '<div class="alerte rien"><span>Rien à signaler : conventions, présences et évaluations sont à jour.</span></div>';
 
-  $("#tableau-en-cours tbody").innerHTML = enCours.length ? enCours.map((s) => {
-    const st = stats(s);
-    return `<tr data-id="${s.id}"><td><strong>${echapper(nomComplet(s))}</strong></td><td>${echapper(formationTexte(s))}</td>
-      <td>${echapper(s.tuteur || "—")}</td><td>${periodeTexte(s)}</td><td>${avancement(s, st)}</td>
-      <td class="nombre">${texteHeures(st.heures)}</td><td class="nombre">${st.absences + st.justifiees}</td>
-      <td>${st.derniereEval ? `${dateCourte(st.derniereEval.date)} · ${texteMoyenne(moyenne(st.derniereEval))}` : '<span class="doux">aucune</span>'}</td></tr>`;
-  }).join("") : '<tr class="vide-ligne"><td colspan="8">Aucun stagiaire en ce moment.</td></tr>';
+  remplirPlanning();
+}
 
-  $("#tableau-a-venir tbody").innerHTML = aVenir.length ? aVenir.map((s) => `<tr data-id="${s.id}"><td><strong>${echapper(nomComplet(s))}</strong></td>
-      <td>${echapper(formationTexte(s))}</td><td>${echapper(s.tuteur || "—")}</td><td>${periodeTexte(s)}</td>
-      <td>${s.convention_signee ? '<span class="ok-texte">Signée</span>' : '<span class="manque-texte">À signer</span>'}</td></tr>`).join("")
-    : '<tr class="vide-ligne"><td colspan="5">Aucun stage prévu.</td></tr>';
+// ============================================================ PLANNING (accueil)
+// Comme le tableau affiché au magasin : une ligne par semaine, 4 places de stagiaire, des observations.
+// Vacances scolaires zone B (académie de Nancy-Metz), du premier au dernier jour sans cours.
+const VACANCES = [
+  ["2025-07-05", "2025-08-31", "Vacances d'été"],
+  ["2025-10-18", "2025-11-02", "Vacances de la Toussaint"],
+  ["2025-12-20", "2026-01-04", "Vacances de Noël"],
+  ["2026-02-14", "2026-03-01", "Vacances d'hiver"],
+  ["2026-04-11", "2026-04-26", "Vacances de printemps"],
+  ["2026-07-04", "2026-08-31", "Vacances d'été"],
+  ["2026-10-17", "2026-11-01", "Vacances de la Toussaint"],
+  ["2026-12-19", "2027-01-03", "Vacances de Noël"],
+  ["2027-02-20", "2027-03-07", "Vacances d'hiver"],
+  ["2027-04-17", "2027-05-02", "Vacances de printemps"],
+  ["2027-07-03", "2027-08-31", "Vacances d'été"],
+];
+const PLACES = 4;
+let ANNEE_PLANNING = null, PLANNING_CENTRE = false;
+
+const anneeIso = (iso) => versDate(ajouterJours(lundiDe(iso), 3)).getUTCFullYear();   // l'année du jeudi
+function semainesDe(annee) {
+  let lundi = lundiDe(`${annee}-01-04`);
+  const semaines = [];
+  while (anneeIso(lundi) === annee) {
+    semaines.push({ numero: semaines.length + 1, lundi, dimanche: ajouterJours(lundi, 6) });
+    lundi = ajouterJours(lundi, 7);
+  }
+  return semaines;
+}
+function vacancesDe(lundi) {
+  // semaine de vacances : au moins 3 jours du lundi au vendredi sans cours
+  for (const [debut, fin, nom] of VACANCES) {
+    const jours = [0, 1, 2, 3, 4].filter((i) => { const j = ajouterJours(lundi, i); return j >= debut && j <= fin; }).length;
+    if (jours >= 3) return nom;
+  }
+  return null;
+}
+
+// Chaque stagiaire garde la même colonne pendant tout son stage (la première libre)
+function placerStagiaires(semaines) {
+  const debutAnnee = semaines[0].lundi, finAnnee = semaines[semaines.length - 1].dimanche;
+  const liste = D.stagiaires.filter((s) => s.date_debut <= finAnnee && s.date_fin >= debutAnnee)
+    .sort((a, b) => (a.date_debut < b.date_debut ? -1 : a.date_debut > b.date_debut ? 1 : nomComplet(a).localeCompare(nomComplet(b), "fr")));
+  const grille = semaines.map(() => Array(PLACES).fill(null));
+  const enTrop = semaines.map(() => []);
+  for (const s of liste) {
+    const index = semaines.map((w, i) => (s.date_debut <= w.dimanche && s.date_fin >= w.lundi ? i : -1)).filter((i) => i >= 0);
+    if (!index.length) continue;
+    const colonne = [...Array(PLACES).keys()].find((c) => index.every((i) => !grille[i][c]));
+    for (const [rang, i] of index.entries()) {
+      if (colonne === undefined) enTrop[i].push(s);
+      else grille[i][colonne] = { s, rang: rang + 1, total: index.length, premiere: rang === 0 };
+    }
+  }
+  return { grille, enTrop };
+}
+
+function nomPlanning(s) {
+  return `<b>${echapper((s.nom || "").toUpperCase())}</b> ${echapper(s.prenom)}`;
+}
+const telephone = (numero) => (numero ? `<a href="tel:${echapper(numero.replace(/[^\d+]/g, ""))}">${echapper(numero)}</a>` : "");
+
+function remplirPlanning() {
+  const jour = aujourdhui();
+  if (ANNEE_PLANNING === null) ANNEE_PLANNING = anneeIso(jour);
+  const annee = ANNEE_PLANNING, semaines = semainesDe(annee), actuelle = lundiDe(jour);
+  $("#annee-planning").textContent = annee;
+  const { grille, enTrop } = placerStagiaires(semaines);
+  const observations = new Map(D.semaines.filter((o) => Number(o.annee) === annee).map((o) => [Number(o.semaine), o.observation || ""]));
+  $("#planning tbody").innerHTML = semaines.map((w, i) => {
+    const vacances = vacancesDe(w.lundi);
+    const cases = grille[i].map((place) => {
+      if (!place) return `<td class="place vide" data-lundi="${w.lundi}" title="Ajouter un stagiaire la semaine ${w.numero}"></td>`;
+      const s = place.s;
+      const details = place.premiere ? `
+          <span class="infos">${s.tuteur ? `Tuteur : ${echapper(s.tuteur)}` : ""}${s.telephone ? `${s.tuteur ? " · " : ""}${telephone(s.telephone)}` : ""}</span>
+          ${s.telephone_proche || s.nom_proche ? `<span class="infos">Proche : ${echapper(s.nom_proche || "")} ${telephone(s.telephone_proche)}</span>` : ""}
+          <span class="cases-conv">
+            <button class="case-conv ${s.pre_convention ? "ok" : ""}" data-basculer="pre_convention" title="Pré-convention">Pré-conv.</button>
+            <button class="case-conv ${s.convention_signee ? "ok" : ""}" data-basculer="convention_signee" title="Convention">Convention</button>
+          </span>`
+        : `<span class="infos">semaine ${place.rang}/${place.total}</span>`;
+      return `<td class="place occupee ${place.premiere ? "debut" : "suite"}" data-id="${s.id}">${nomPlanning(s)}${details}</td>`;
+    }).join("");
+    const trop = enTrop[i].length ? `<div class="trop">+ ${enTrop[i].map((s) => echapper(nomComplet(s))).join(", ")} (plus de ${PLACES} stagiaires)</div>` : "";
+    return `<tr class="${vacances ? "vacances" : ""} ${w.lundi === actuelle ? "actuelle" : ""}" data-semaine="${w.numero}">
+      <td class="num" ${vacances ? `title="${vacances}"` : ""}>${w.numero}</td>
+      <td class="dates">${dateCourte(w.lundi).slice(0, 5)}<br>${dateCourte(w.dimanche).slice(0, 5)}</td>
+      ${cases}
+      <td class="obs"><textarea rows="2" data-semaine="${w.numero}" placeholder="${vacances ? echapper(vacances) : ""}">${echapper(observations.get(w.numero) || "")}</textarea>${trop}</td></tr>`;
+  }).join("");
+  if (!PLANNING_CENTRE) { PLANNING_CENTRE = true; centrerSemaine(); }
+}
+
+function centrerSemaine() {
+  const ligne = $("#planning tr.actuelle"), cadre = $("#cadre-planning");
+  if (ligne) cadre.scrollTop = Math.max(0, ligne.offsetTop - cadre.clientHeight / 3);
+  else cadre.scrollTop = 0;
+}
+
+async function basculerConvention(id, champ) {
+  const s = parId(id);
+  if (!s) return;
+  const ligne = { ...s, [champ]: !s[champ], modifie_par: base.utilisateur(), modifie_le: new Date().toISOString() };
+  const ok = await executer(async () => { await base.ecrire("stg_stagiaires", [ligne], "id"); return true; });
+  if (!ok) return;
+  notifier(`${nomComplet(s)} : ${champ === "pre_convention" ? "pré-convention" : "convention"} ${ligne[champ] ? "faite" : "à faire"}.`);
+  await executer(chargerDonnees);
+  remplirAccueil();
+}
+
+async function enregistrerObservation(zone) {
+  const semaine = Number(zone.dataset.semaine), texte = zone.value.trim();
+  const avant = D.semaines.find((o) => Number(o.annee) === ANNEE_PLANNING && Number(o.semaine) === semaine)?.observation || "";
+  if (texte === avant) return;
+  const ok = await executer(async () => {
+    await base.ecrire("stg_semaines", [{ annee: ANNEE_PLANNING, semaine, observation: texte, modifie_par: base.utilisateur(), modifie_le: new Date().toISOString() }], "annee,semaine");
+    return true;
+  });
+  if (!ok) return;
+  notifier(`Observation de la semaine ${semaine} enregistrée.`);
+  await executer(chargerDonnees);
 }
 
 // ============================================================ LISTE DES STAGIAIRES
@@ -1383,26 +1559,28 @@ function remplirListe() {
     return `<tr data-id="${s.id}"><td><strong>${echapper(nomComplet(s))}</strong></td><td>${echapper(formationTexte(s))}</td>
       <td>${echapper(s.tuteur || "—")}</td><td>${periodeTexte(s)}</td><td>${etiquetteStatut(etat, ETATS_STAGE[etat])}</td>
       <td class="nombre">${texteHeures(st.heures)}</td><td class="nombre">${st.absences + st.justifiees}</td>
-      <td>${s.convention_signee ? '<span class="ok-texte">Signée</span>' : '<span class="manque-texte">À signer</span>'}</td></tr>`;
+      <td>${etatConventions(s)}</td></tr>`;
   }).join("") : `<tr class="vide-ligne"><td colspan="8">${D.stagiaires.length ? "Aucun stagiaire dans cette liste." : "Aucun stagiaire pour l'instant : clique sur « Nouveau stagiaire »."}</td></tr>`;
 }
 
 // ============================================================ FICHE
 let FICHE_ID = null;
 const CHAMPS_FICHE = { prenom: "#f-prenom", nom: "#f-nom", ecole: "#f-ecole", formation: "#f-formation", date_debut: "#f-debut",
-                       date_fin: "#f-fin", tuteur: "#f-tuteur", referent_ecole: "#f-referent", contact_referent: "#f-contact", notes: "#f-notes" };
+                       date_fin: "#f-fin", tuteur: "#f-tuteur", referent_ecole: "#f-referent", contact_referent: "#f-contact", notes: "#f-notes",
+                       telephone: "#f-telephone", nom_proche: "#f-proche", telephone_proche: "#f-telephone-proche" };
 
 function marquerFiche(modifie = true) {
   MODIFIE.fiche = modifie;
   $("#etat-fiche").textContent = modifie ? "Modifications non enregistrées." : FICHE_ID ? "Aucune modification en cours." : "Remplis au moins le prénom et les dates, puis Enregistrer.";
 }
 
-function ouvrirFiche(id) {
+function ouvrirFiche(id, preremplir = {}) {
   const s = id ? parId(id) : null;
   FICHE_ID = s ? s.id : null;
-  for (const [cle, champ] of Object.entries(CHAMPS_FICHE)) $(champ).value = s ? (s[cle] ?? "") : "";
+  for (const [cle, champ] of Object.entries(CHAMPS_FICHE)) $(champ).value = s ? (s[cle] ?? "") : (preremplir[cle] ?? "");
   $("#f-heures").value = s && s.heures_semaine !== null && s.heures_semaine !== undefined ? String(s.heures_semaine).replace(".", ",") : "";
   $("#f-convention").checked = !!s?.convention_signee;
+  $("#f-pre-convention").checked = !!s?.pre_convention;
   $$(".formulaire label.invalide").forEach((l) => l.classList.remove("invalide"));
   $("#titre-fiche").textContent = s ? nomComplet(s) : "Nouveau stagiaire";
   $("#supprimer-fiche").disabled = !s;
@@ -1455,7 +1633,7 @@ async function enregistrerFiche() {
   if (erreurs.length) return notifier(`Il manque ${erreurs.join(", ")}.`, true);
 
   const id = FICHE_ID || nouvelId();
-  const ligne = { id, ...valeurs, heures_semaine: heures, convention_signee: $("#f-convention").checked,
+  const ligne = { id, ...valeurs, heures_semaine: heures, convention_signee: $("#f-convention").checked, pre_convention: $("#f-pre-convention").checked,
                   modifie_par: base.utilisateur(), modifie_le: new Date().toISOString() };
   const ok = await executer(async () => { await base.ecrire("stg_stagiaires", [ligne], "id"); return true; });
   if (!ok) return;
@@ -1822,18 +2000,33 @@ function brancher() {
   });
   $$(".lien").forEach((l) => l.addEventListener("click", () => afficher(l.dataset.page)));
 
-  // Accueil : clic sur une alerte ou un stagiaire
-  $("#page-accueil").addEventListener("click", (e) => {
+  // Accueil : alertes et planning
+  $("#alertes").addEventListener("click", (e) => {
     const alerte = e.target.closest(".alerte[data-id]");
-    if (alerte) {
-      const s = parId(alerte.dataset.id);
-      if (alerte.dataset.page === "presences") return afficher("presences", { date: aujourdhui() });
-      if (alerte.dataset.page === "evaluations") return afficher("evaluations", { id: s?.id });
-      return afficher("fiche", { id: s?.id });
-    }
-    const tr = e.target.closest("tr[data-id]");
-    if (tr) afficher("fiche", { id: tr.dataset.id });
+    if (!alerte) return;
+    const s = parId(alerte.dataset.id);
+    if (alerte.dataset.page === "presences") return afficher("presences", { date: aujourdhui() });
+    if (alerte.dataset.page === "evaluations") return afficher("evaluations", { id: s?.id });
+    afficher("fiche", { id: s?.id });
   });
+  $("#planning").addEventListener("click", (e) => {
+    if (e.target.closest("a, textarea")) return;
+    const bascule = e.target.closest("[data-basculer]");
+    const place = e.target.closest("td.place");
+    if (bascule && place) return basculerConvention(place.dataset.id, bascule.dataset.basculer);
+    if (place?.dataset.id) return afficher("fiche", { id: place.dataset.id });
+    if (place?.dataset.lundi) {
+      afficher("fiche", { id: null, preremplir: { date_debut: place.dataset.lundi, date_fin: ajouterJours(place.dataset.lundi, 5) } });
+    }
+  });
+  $("#planning").addEventListener("change", (e) => { if (e.target.matches("textarea[data-semaine]")) enregistrerObservation(e.target); });
+  $("#planning").addEventListener("keydown", (e) => {
+    if (e.target.matches("textarea[data-semaine]") && e.key === "Enter" && !e.shiftKey) { e.preventDefault(); e.target.blur(); }
+  });
+  const changerAnnee = (n) => { ANNEE_PLANNING += n; remplirPlanning(); $("#cadre-planning").scrollTop = 0; };
+  $("#annee-precedente").addEventListener("click", () => changerAnnee(-1));
+  $("#annee-suivante").addEventListener("click", () => changerAnnee(1));
+  $("#semaine-actuelle").addEventListener("click", () => { ANNEE_PLANNING = anneeIso(aujourdhui()); remplirPlanning(); centrerSemaine(); });
 
   // Liste
   $("#nouveau-stagiaire").addEventListener("click", () => afficher("fiche", { id: null }));
@@ -1972,7 +2165,7 @@ function brancher() {
   setInterval(async () => {
     if (!base.utilisateur() || document.hidden || !$("#ecran-connexion").hidden || !$("#dialogue").hidden) return;
     const page = afficher.page;
-    if (MODIFIE[page]) return;
+    if (MODIFIE[page] || document.activeElement?.closest?.("#planning")) return;
     await executer(async () => {
       await chargerDonnees();
       if (page === "accueil") remplirAccueil();
