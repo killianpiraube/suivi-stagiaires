@@ -31,7 +31,7 @@
   --statut-critique: #d03b3b;
 }
 
-* { box-sizing: border-box; margin: 0; border-radius: 0 !important; }
+* { box-sizing: border-box; margin: 0; }
 
 html, body { height: 100%; }
 body {
@@ -581,6 +581,51 @@ html[data-theme="sombre"] { --vacances: #6b2a3d; --vacances-ligne: #33232a; }
 .planning td.obs textarea:hover { border-color: var(--bord); }
 .planning td.obs textarea:focus { background: var(--blanc); border-color: var(--accent); }
 .planning .trop { color: var(--rouge); font-size: 11.5px; font-weight: 600; margin-top: 2px; }
+
+/* =====================================================================
+   ANGLES ARRONDIS (style plus doux)
+   ===================================================================== */
+:root { --r-petit: 7px; --r-moyen: 10px; --r-grand: 14px; }
+.bouton, .gros, .petit-bouton, .fleche, .bascule, .pastille-couleur, .case-conv,
+input, select, textarea, .recherche, .ruban select, .ruban input[type=date] { border-radius: var(--r-petit); }
+input[type=checkbox] { border-radius: 4px; }
+.choix, .niveaux { border-radius: var(--r-petit); overflow: hidden; }
+.bouton-logo { border-radius: var(--r-moyen); }
+
+/* menu : liens en pastilles arrondies */
+.lien { margin: 2px 8px; padding: 0 12px; border-radius: var(--r-moyen); border-left: none; }
+.lien.actif { box-shadow: inset 3px 0 0 var(--sur-accent); }
+#application.replie .lien { margin: 2px 6px; padding: 0 12px; }
+
+/* cartes et blocs */
+.chiffres { border-radius: var(--r-grand); overflow: hidden; }
+.encart, .alerte, .attente, .carte-appreciation, .erreur { border-radius: var(--r-moyen); }
+.feuille { border-radius: var(--r-grand); }
+.liste-sections, .criteres { border-radius: var(--r-moyen); overflow: hidden; }
+.categories button { width: calc(100% - 16px); margin: 2px 8px; border-radius: var(--r-petit); border-left: none; }
+.categories button.actif { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* tableaux : coins arrondis (bordures séparées) */
+.tableau-office { border-collapse: separate; border-spacing: 0; border-radius: var(--r-moyen); overflow: hidden; }
+.cadre-planning { border-radius: var(--r-grand); }
+.planning th:first-child { border-top-left-radius: var(--r-grand); }
+.planning th:last-child { border-top-right-radius: var(--r-grand); }
+.planning td.place.occupee { border-radius: 0; }
+
+/* fenêtres */
+.carte-connexion { border-radius: 18px; }
+.boite { border-radius: var(--r-grand); }
+#notification { border-radius: var(--r-moyen); }
+
+/* petits repères ronds */
+.etiquette-statut i, .niveau i, .pastille-couleur i, .legende-planning i, .bascule i { border-radius: 50%; }
+.avancement .piste, .avancement .piste i { border-radius: 99px; }
+.case-conv::before { border-radius: 3px; }
+.echantillon i { border-radius: var(--r-petit); }
+
+/* planning : le défilement s'arrête au bout du tableau (il n'entraîne plus la page) */
+.cadre-planning { overscroll-behavior: contain; scroll-behavior: smooth; }
+.formulaire input[type=tel] { height: 32px; padding: 0 8px; border: 1px solid var(--bord-fort); font-family: inherit; font-size: 13.5px; }
 
 </style>
 </head>
